@@ -115,25 +115,26 @@ void write_copy_dpu(struct out_buffer_context *output, uint32_t copy_length, uin
 	uint32_t read_index = output->curr - offset;
 	dbg_printf("Copying %u bytes from offset=0x%x to 0x%x\n", copy_length, read_index, output->curr);
 
-	uint8_t read_buf[OUT_BUFFER_LENGTH];
-	uint8_t *read_ptr = read_buf;
+	uint8_t *read_ptr;
 	uint32_t curr_index = output->curr - output->append_window;
 	while (copy_length)
 	{
 		uint32_t to_copy = MIN(OUT_BUFFER_LENGTH - curr_index, copy_length);
-
+		
 		// First check if we can use data already in the append window, note we do not need to check the
 		// upper bound since the first check in this function handles that case
 		if (read_index >= output->append_window) {
 			read_ptr = &output->append_ptr[read_index % OUT_BUFFER_LENGTH];
 		}
 		else {
-			read_ptr = read_buf;
-			mram_read(&output->buffer[read_index], read_buf, ALIGN(to_copy, 8));
+			uint32_t index_offset = read_index - ALIGN_DOWN(read_index, 8);
+			mram_read(&output->buffer[read_index - index_offset], output->read_buf, ALIGN(to_copy + index_offset, 8));
+			read_ptr = output->read_buf + index_offset;
 		}	
-
+		
 		memcpy(&output->append_ptr[curr_index], read_ptr, to_copy);
 		curr_index += to_copy;
+		output->curr += to_copy;
 		copy_length -= to_copy;
 		read_index += to_copy;
 
@@ -167,7 +168,7 @@ snappy_status dpu_uncompress(struct in_buffer_context *input, struct out_buffer_
 		uint32_t offset;
 		uint8_t tag;
 		tag = READ_BYTE(input);
-		dbg_printf("Got tag byte 0x%x at index 0x%x\n", tag, input->curr - 1);
+//		dbg_printf("Got tag byte 0x%x at index 0x%x\n", tag, input->curr - 1);
 		// There are two types of elements in a Snappy stream: Literals and
 		// copies (backreferences). Each element starts with a tag byte,
 		// and the lower two bits of this tag byte signal what type of element
