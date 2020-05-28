@@ -140,7 +140,7 @@ static uint32_t make_offset_4_byte(uint8_t tag, struct host_buffer_context *inpu
 	}
 }
 
-static inline bool writer_append_host(struct host_buffer_context *input, struct host_buffer_context *output, uint32_t len)
+static inline void writer_append_host(struct host_buffer_context *input, struct host_buffer_context *output, uint32_t len)
 {
 	//printf("Writing %u bytes at 0x%x\n", len, (input->curr - input->buffer));
 	while (len && 
@@ -152,7 +152,6 @@ static inline bool writer_append_host(struct host_buffer_context *input, struct 
 		output->curr++;
 		len--;
 	}
-	return true;
 }
 
 void write_copy_host(struct host_buffer_context *output, uint32_t copy_length, uint32_t offset)
@@ -212,8 +211,7 @@ snappy_status snappy_uncompress_host(struct host_buffer_context *input, struct h
 				length = read_long_literal_size(input, length - 60) + 1;
 			}
 
-			if (!writer_append_host(input, output, length))
-				return SNAPPY_OUTPUT_ERROR;
+			writer_append_host(input, output, length);
 			break;
 
 		/* Copies are references back into previous decompressed data, telling
