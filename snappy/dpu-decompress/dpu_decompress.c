@@ -127,7 +127,7 @@ void write_copy_dpu(struct out_buffer_context *output, uint32_t copy_length, uin
 			read_ptr = &output->append_ptr[read_index % OUT_BUFFER_LENGTH];
 		}
 		else {
-			uint32_t index_offset = read_index - ALIGN_DOWN(read_index, 8);
+			uint32_t index_offset = read_index - WINDOW_ALIGN(read_index, 8);
 			mram_read(&output->buffer[read_index - index_offset], output->read_buf, ALIGN(to_copy + index_offset, 8));
 			read_ptr = output->read_buf + index_offset;
 		}	
