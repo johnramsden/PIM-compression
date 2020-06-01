@@ -1,0 +1,16 @@
+num_dpus = ['16', '32', '64', '128']
+num_tasks = ['4', '8', '12', '16', '20', '24']
+
+# Need as many as num_tasks
+colors = ['#c9b395', '#5c4832', '#2e3d18', '#4e6625', '#80be1b', '#cbd970']
+
+# 'test file' : ('num_dpus', 'num_tasklets')
+files = {'terror2': ('1', '4'),
+         'plrabn12': ('2', '8'),
+         'world192': ('4', '12'),
+         'xml': ('15', '12'),
+         'sao': ('21', '12'),
+         'dickens': ('35', '12'),
+         'nci': ('64', '18'),
+         'mozilla': ('105', '16'),
+         'spamfile': ('172', '16')}
